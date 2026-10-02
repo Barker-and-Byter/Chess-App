@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { chessBoard } from '#lib/components/Board.ts';
+	import { chessBoard } from '#lib/components/Board.svelte.ts';
 	let squares = Array.from({ length: 64 });
 
 	let dragIndex: number | null = $state(null);
@@ -8,14 +8,18 @@
 		dragIndex = index;
 	}
 
-	function handleDrop(targetIndex: number){
-        if (dragIndex !== null && dragIndex !== targetIndex){
-            chessBoard.BoardPieces[targetIndex] = chessBoard.BoardPieces[dragIndex];
-            delete chessBoard.BoardPieces[dragIndex];
-            chessBoard.BoardPieces = {...chessBoard.BoardPieces};
-        }
-        dragIndex = null;
-    }
+	function handleDrop(targetIndex: number) {
+		if (dragIndex !== null && dragIndex !== targetIndex) {
+            chessBoard.enPassantIndex = undefined;
+			let valid = chessBoard.checkMove(dragIndex, targetIndex);
+			if (valid) {
+				chessBoard.BoardPieces[targetIndex] = chessBoard.BoardPieces[dragIndex];
+				delete chessBoard.BoardPieces[dragIndex];
+				chessBoard.BoardPieces = { ...chessBoard.BoardPieces };
+			}
+		}
+		dragIndex = null;
+	}
 </script>
 
 <main class="flex min-h-screen w-full flex-col items-center justify-center bg-[#2c2b29]">
@@ -28,9 +32,9 @@
 				class="flex aspect-square w-20 items-center justify-center rounded font-bold
     {(Math.floor(index / 8) + index) % 2 === 0 ? 'bg-[#eeeed2]' : 'bg-[#769656]'}"
 				ondragover={(event) => event.preventDefault()}
-                ondrop={() => handleDrop(index)}
+				ondrop={() => handleDrop(index)}
 			>
-				<!-- {index} -->
+				{index}
 				{#if chessBoard.BoardPieces[index]}
 					<img
 						src={chessBoard.BoardPieces[index]}
